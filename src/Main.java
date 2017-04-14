@@ -4,8 +4,15 @@
 class Main {
 
     public static void main(String args[]){
-        System.out.println("Test");
-        GUI gui = new GUI();
+
+        int numObjects = 50;
+        int planeSize = 500;
+
+        if (args.length > 1){
+            numObjects = Integer.parseInt(args[1]);
+        }
+
+        GUI gui = new GUI(numObjects, planeSize);
         gui.setVisible(true);
     }
 

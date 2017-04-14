@@ -8,6 +8,7 @@ import Helpers.Rectangle;
 /**
  * Created by Tristan on 2017-04-14.
  */
+
 public class AStar {
 
     Point start;
@@ -16,26 +17,34 @@ public class AStar {
     Graphics2D g;
 
     public AStar(Point start, Point end, QuadTree tree, Graphics2D g){
-        this.start = start;
-        this.end = end;
+        this.start = tree.getPointLocation(start.x, start.y);
+        this.end = tree.getPointLocation(end.x, end.y);
         this.tree = tree;
         this.g = g;
 
     }
 
     public boolean findPath(){
-        start = tree.getPointLocation(start.x, start.y);
-        end = tree.getPointLocation(end.x, end.y);
 
         Set set = new Set(start, 0, Math.hypot(end.x - start.x, end.y - start.y), null);
         ArrayList<Set> openSet = new ArrayList<>();
         openSet.add(set);
         ArrayList<Set> closedSet = new ArrayList<>();
 
+        Rectangle centerStart = tree.getPointLocationAndDimensions(start.x, start.y);
+        Rectangle centerEnd = tree.getPointLocationAndDimensions(end.x, end.y);
+
+        int ovalWidth = 10;
+        int ovalHeight = 10;
+
+        int ax = (centerStart.point.x + (centerStart.w/2)) - (ovalWidth/2);
+        int ay = (centerStart.point.y + (centerStart.h/2)) - (ovalHeight/2);
+        int bx = (centerEnd.point.x + (centerEnd.w/2)) - (ovalWidth/2);
+        int by = (centerEnd.point.y + (centerEnd.h/2)) - (ovalHeight/2);
 
         g.setColor(new Color(0,255,0));
-        g.drawOval(start.x, start.y, 10,10);
-        g.drawOval(end.x, end.y, 10,10);
+        g.drawOval(ax, ay, 10,10);
+        g.drawOval(bx, by, 10,10);
 
         Set current;
 
@@ -48,11 +57,20 @@ public class AStar {
             }
 
             if (current.p.equals(end)){
-                System.out.println("FOUND IT");
 
                 while (current.prev != null) {
                     g.setColor(new Color(255, 0, 0));
-                    g.drawLine(current.prev.x, current.prev.y, current.p.x, current.p.y);
+                    Rectangle r = tree.getPointLocationAndDimensions(current.prev.x, current.prev.y);
+                    Rectangle rc = tree.getPointLocationAndDimensions(current.p.x, current.p.y);
+
+                    ax = (r.point.x + (r.w/2));
+                    ay = (r.point.y + (r.h/2));
+                    bx = (rc.point.x + (rc.w/2));
+                    by = (rc.point.y + (rc.h/2));
+
+                    g.drawLine(ax,ay,bx,by);
+
+                    //g.drawLine((current.prev.x, current.prev.y, current.p.x, current.p.y);
                     boolean bail = false;
                     for (Set sets : openSet) {
                         if (current.prev != null && current.prev.equals(sets.p) && bail != true) {

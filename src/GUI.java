@@ -6,7 +6,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import Helpers.Point;
 
@@ -15,18 +14,21 @@ import Helpers.Rectangle;
 /**
  * Created by Tristan on 2017-04-13.
  */
-public class GUI extends JFrame implements KeyListener, MouseListener{
+public class GUI extends JFrame implements KeyListener{
 
     Canvas canvas;
+    int numObjects = 50;
+    int planeSize = 500;
 
-
-    public GUI(){
+    public GUI(int numObjects, int planeSize){
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(600, 600));
         addKeyListener(this);
-        addMouseListener(this);
 
-        canvas = new Canvas();
+        this.numObjects = numObjects;
+        this.planeSize = planeSize;
+
+        canvas = new Canvas(this.numObjects, this.planeSize);
         add(canvas);
     }
 
@@ -47,42 +49,50 @@ public class GUI extends JFrame implements KeyListener, MouseListener{
             canvas.setRandomPoints();
         }else if(e.getKeyCode() == KeyEvent.VK_Q){
             canvas.toggleTreeDraw();
+        }else if(e.getKeyCode() == KeyEvent.VK_EQUALS){
+            numObjects += 10;
+            remakeCanvas();
+        }else if(e.getKeyCode() == KeyEvent.VK_MINUS){
+            numObjects -= 10;
+            if (numObjects <= 10){
+                numObjects = 10;
+            }
+            remakeCanvas();
+        }else if(e.getKeyCode() == KeyEvent.VK_R){
+            remakeCanvas();
+        }else if(e.getKeyCode() == KeyEvent.VK_UP){
+            planeSize += 100;
+            remakeCanvas();
+        }else if(e.getKeyCode() == KeyEvent.VK_DOWN){
+            planeSize -= 100;
+            if (planeSize < 100){
+                planeSize = 100;
+            }
+            remakeCanvas();
         }
     }
 
-    @Override
-    public void mouseClicked(MouseEvent e) {
+    public void remakeCanvas(){
+
+        canvas.numObstacles = numObjects;
+        canvas.planeSize = planeSize;
+        canvas.setup();
+        canvas.repaint();
 
     }
 
-    @Override
-    public void mousePressed(MouseEvent e) {
-        System.out.println(e.getX() + "," + e.getY());
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-
-    }
 }
 
 
 class Canvas extends JComponent {
 
-    int numObstacles = 20;
+    int numObstacles = 50;
     int planeSize = 500;
     int minObstacleSize = 10;
     int maxObstacleSize = 50;
+
+    long preTime = 0;
+    long postTime = 0;
 
     boolean drawTree = true;
 
@@ -93,9 +103,19 @@ class Canvas extends JComponent {
     BitSet filledin;
     QuadTree tree;
 
-    public Canvas(){
+    public Canvas(int numObstacles, int planeSize){
+        this.numObstacles = numObstacles;
+        this.planeSize = planeSize;
+
         obstacles = new ArrayList<>();
+
+        setup();
+    }
+
+    public void setup(){
+
         filledin = new BitSet(planeSize * planeSize);
+        obstacles.clear();
         filledin.clear();
 
         for (int i = 0; i < numObstacles; i++){
@@ -116,12 +136,10 @@ class Canvas extends JComponent {
             }
 
             if (finalX + obsWidth >= planeSize){
-                //finalX = planeSize - obsWidth;
                 obsWidth = planeSize - finalX;
             }
 
             if (finalY + obsHeight >= planeSize){
-                //finalY = planeSize - obsHeight;
                 obsHeight = planeSize - finalY;
             }
 
@@ -167,14 +185,22 @@ class Canvas extends JComponent {
         start = p;
         end = p2;
 
+        if (tree.getPointLocation(p.x, p.y) == tree.getPointLocation(p2.x, p2.y)){
+            setRandomPoints();
+        }
+
         repaint();
 
     }
 
     public void solvePath(Graphics2D g){
         AStar astar = new AStar(start, end, tree, g);
-        if (!astar.findPath()){
-            System.out.println("No Path found");
+        if (astar.findPath()){
+            g.setColor(new Color(0,0,0));
+            g.drawString("Path Found!", 375, planeSize+15);
+        }else{
+            g.setColor(new Color(0,0,0));
+            g.drawString("Couldn't find path!", 375, planeSize+15);
         }
     }
 
@@ -207,7 +233,18 @@ class Canvas extends JComponent {
             tree.draw(p);
         }
 
+        preTime = System.nanoTime();
         solvePath(p);
+        postTime = System.nanoTime();
+
+        g.setColor(new Color(0,0,0));
+        p.drawString("Execution Time: " + ((double)(postTime-preTime)/1000000000.0), 20,planeSize+15);
+        p.drawString("Num Objects: " + numObstacles, 225, planeSize+15);
+        p.drawString("R = New Map           Space = New Path    Up Arrow = Larger Map", 20, planeSize+50);
+//        p.drawString("Space = New Path", 150, 540);
+        p.drawString("+ = More Objects    - = Less Objects      Down Arrow = Smaller Map", 20, planeSize+75);
+//        p.drawString("- = Less Objects", 150, 575);
+
 
         revalidate();
     }
