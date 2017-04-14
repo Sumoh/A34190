@@ -37,7 +37,6 @@ public class AStar {
         g.drawOval(start.x, start.y, 10,10);
         g.drawOval(end.x, end.y, 10,10);
 
-
         Set current;
 
         while (openSet.size() > 0){

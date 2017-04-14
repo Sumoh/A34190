@@ -44,31 +44,18 @@ public class QuadTree {
     }
 
 
-//    if(self.value != 1):
-//    rect = Rectangle(Point(self.topLeftX,self.topLeftY), Point(self.topLeftX + self.width, self.topLeftY + self.height))
-//            rect.draw(window)
-//            rect.setOutline('blue')
-//            if(self.NW != None):
-//            self.NW.draw(window)
-//            if(self.NE != None):
-//            self.NE.draw(window)
-//            if(self.SW != None):
-//            self.SW.draw(window)
-//            if(self.SE != None):
-//            self.SE.draw(window)
-
     public boolean insert(int x,int y){
 
         if (x < topLeftPoint.x || x >= (topLeftPoint.x + width) || y < topLeftPoint.y || y >= (topLeftPoint.y + height)){
             return false;
         }
 
-        if (width <= 1 && height <= 1){
+        if (width == 1 && height == 1){
             value = 1;
             return true;
         }
 
-        if (topRight == null){
+        if (topLeft == null){
             subdivide();
         }
 
@@ -98,10 +85,10 @@ public class QuadTree {
             topRight = new QuadTree(topLeftPoint.x, topLeftPoint.y + 1,1,1);
         }else{
             int halfWidth = width/2;
-            int otherHalfWidth = (int)Math.ceil(width/2);
+            int otherHalfWidth = (int)Math.ceil((double)width/2.0);
 
             int halfHeight = height/2;
-            int otherHalfHeight = (int)Math.ceil(height/2);
+            int otherHalfHeight = (int)Math.ceil((double)height/2.0);
 
             topLeft = new QuadTree(topLeftPoint.x, topLeftPoint.y, halfWidth, halfHeight);
             topRight = new QuadTree(topLeftPoint.x + halfWidth, topLeftPoint.y, otherHalfWidth, halfHeight);
@@ -154,8 +141,7 @@ public class QuadTree {
             return new Rectangle(topLeftPoint, width, height);
         }
 
-        Rectangle ret = null;
-        ret = topLeft.getPointLocationAndDimensions(x,y);
+        Rectangle ret = topLeft.getPointLocationAndDimensions(x,y);
         if (ret != null){
             return ret;
         }
@@ -163,13 +149,15 @@ public class QuadTree {
         if (ret != null){
             return ret;
         }
-        ret = bottomLeft.getPointLocationAndDimensions(x,y);
-        if (ret != null){
-            return ret;
-        }
-        ret = bottomRight.getPointLocationAndDimensions(x,y);
-        if (ret != null){
-            return ret;
+        if (bottomLeft != null){
+            ret = bottomLeft.getPointLocationAndDimensions(x,y);
+            if (ret != null){
+                return ret;
+            }
+            ret = bottomRight.getPointLocationAndDimensions(x,y);
+            if (ret != null) {
+                return ret;
+            }
         }
 
         return ret;
@@ -203,7 +191,7 @@ public class QuadTree {
         checkX = currentData.point.x - 1;
         checkY = currentData.point.y;
         neighbor = getPointLocationAndDimensions(checkX, checkY);
-        while (neighbor != null && checkY < currentData.point.y + currentData.w){
+        while (neighbor != null && checkY < currentData.point.y + currentData.h){
             checkY += neighbor.h;
             neighbors.add(neighbor);
             neighbor = getPointLocationAndDimensions(checkX, checkY);
@@ -213,7 +201,7 @@ public class QuadTree {
         checkX = currentData.point.x + currentData.w;
         checkY = currentData.point.y;
         neighbor = getPointLocationAndDimensions(checkX, checkY);
-        while (neighbor != null && checkY < currentData.point.y + currentData.w){
+        while (neighbor != null && checkY < currentData.point.y + currentData.h){
             checkY += neighbor.h;
             neighbors.add(neighbor);
             neighbor = getPointLocationAndDimensions(checkX, checkY);

@@ -45,7 +45,6 @@ public class GUI extends JFrame implements KeyListener, MouseListener{
 
         if (e.getKeyCode() == KeyEvent.VK_SPACE){
             canvas.setRandomPoints();
-            canvas.repaint();
         }else if(e.getKeyCode() == KeyEvent.VK_Q){
             canvas.toggleTreeDraw();
         }
@@ -80,7 +79,7 @@ public class GUI extends JFrame implements KeyListener, MouseListener{
 
 class Canvas extends JComponent {
 
-    int numObstacles = 50;
+    int numObstacles = 20;
     int planeSize = 500;
     int minObstacleSize = 10;
     int maxObstacleSize = 50;
@@ -117,11 +116,13 @@ class Canvas extends JComponent {
             }
 
             if (finalX + obsWidth >= planeSize){
-                finalX = planeSize - obsWidth;
+                //finalX = planeSize - obsWidth;
+                obsWidth = planeSize - finalX;
             }
 
             if (finalY + obsHeight >= planeSize){
-                finalY = planeSize - obsHeight;
+                //finalY = planeSize - obsHeight;
+                obsHeight = planeSize - finalY;
             }
 
             obstacles.add(new Rectangle(finalX,finalY,obsWidth,obsHeight));
@@ -165,6 +166,8 @@ class Canvas extends JComponent {
 
         start = p;
         end = p2;
+
+        repaint();
 
     }
 
