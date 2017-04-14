@@ -1,6 +1,5 @@
 import Helpers.Point;
 import Helpers.Rectangle;
-import org.w3c.dom.css.Rect;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ public class QuadTree {
     int width = 0;
     int height = 0;
 
-    int value = 0;
+    boolean filledIn = false;
 
     QuadTree topLeft, topRight, bottomLeft, bottomRight;
 
@@ -26,8 +25,10 @@ public class QuadTree {
     }
 
     public void draw(Graphics2D g){
-        if (value != 1) {
+        if (!filledIn) {
+
             g.drawRect(topLeftPoint.x, topLeftPoint.y, width, height);
+
             if (topLeft != null) {
                 topLeft.draw(g);
             }
@@ -46,12 +47,12 @@ public class QuadTree {
 
     public boolean insert(int x,int y){
 
-        if (x < topLeftPoint.x || x >= (topLeftPoint.x + width) || y < topLeftPoint.y || y >= (topLeftPoint.y + height)){
+        if (y < topLeftPoint.y || y >= (topLeftPoint.y + height) || x < topLeftPoint.x || x >= (topLeftPoint.x + width)){
             return false;
         }
 
-        if (width == 1 && height == 1){
-            value = 1;
+        if (height == 1 && width == 1){ //1 cm accuracy
+            filledIn = true;
             return true;
         }
 
@@ -71,7 +72,6 @@ public class QuadTree {
         if (bottomRight.insert(x,y)){
             return true;
         }
-
 
         return false;
     }
@@ -135,7 +135,7 @@ public class QuadTree {
         }
 
         if (topLeft == null){
-            if (value == 1){
+            if (filledIn){
                 return null;
             }
             return new Rectangle(topLeftPoint, width, height);

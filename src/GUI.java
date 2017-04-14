@@ -240,7 +240,7 @@ class Canvas extends JComponent {
         g.setColor(new Color(0,0,0));
         p.drawString("Execution Time: " + ((double)(postTime-preTime)/1000000000.0), 20,planeSize+15);
         p.drawString("Num Objects: " + numObstacles, 225, planeSize+15);
-        p.drawString("R = New Map           Space = New Path    Up Arrow = Larger Map", 20, planeSize+50);
+        p.drawString("R = New Map     Space = New Path    Up Arrow = Larger Map    Q = Toggle drawing quadtree", 20, planeSize+50);
 //        p.drawString("Space = New Path", 150, 540);
         p.drawString("+ = More Objects    - = Less Objects      Down Arrow = Smaller Map", 20, planeSize+75);
 //        p.drawString("- = Less Objects", 150, 575);
