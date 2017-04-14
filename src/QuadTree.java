@@ -9,9 +9,7 @@ import java.util.ArrayList;
  */
 public class QuadTree {
 
-    Point topLeftPoint;
-    int width = 0;
-    int height = 0;
+    Rectangle tree;
 
     boolean filledIn = false;
 
@@ -19,15 +17,12 @@ public class QuadTree {
 
 
     public QuadTree(int tlx, int tly, int w, int h){
-        topLeftPoint = new Point(tlx, tly);
-        width = w;
-        height = h;
+        tree = new Rectangle(tlx, tly, w, h);
     }
 
     public void draw(Graphics2D g){
         if (!filledIn) {
-
-            g.drawRect(topLeftPoint.x, topLeftPoint.y, width, height);
+            g.drawRect(tree.point.x, tree.point.y, tree.w, tree.h);
 
             if (topLeft != null) {
                 topLeft.draw(g);
@@ -44,20 +39,28 @@ public class QuadTree {
         }
     }
 
-
-    public boolean insert(int x,int y){
-
-        if (y < topLeftPoint.y || y >= (topLeftPoint.y + height) || x < topLeftPoint.x || x >= (topLeftPoint.x + width)){
+    public boolean validPoint(int x, int y){
+        if (y < tree.point.y || y >= (tree.point.y + tree.h) || x < tree.point.x || x >= (tree.point.x + tree.w)){
             return false;
         }
 
-        if (height == 1 && width == 1){ //1 cm accuracy
+        return true;
+    }
+
+
+    public boolean insert(int x,int y){
+
+        if (!validPoint(x,y)){
+            return false;
+        }
+
+        if (tree.h == 1 && tree.w == 1){ //1 cm accuracy
             filledIn = true;
             return true;
         }
 
         if (topLeft == null){
-            subdivide();
+            divideTree();
         }
 
         if (topLeft.insert(x,y)){
@@ -76,51 +79,52 @@ public class QuadTree {
         return false;
     }
 
-    public void subdivide(){
-        if (height == 1){
-            topLeft = new QuadTree(topLeftPoint.x, topLeftPoint.y,1,1);
-            topRight = new QuadTree(topLeftPoint.x + 1, topLeftPoint.y,1,1);
-        }else if(width == 1){
-            topLeft = new QuadTree(topLeftPoint.x, topLeftPoint.y, 1,1);
-            topRight = new QuadTree(topLeftPoint.x, topLeftPoint.y + 1,1,1);
+    public void divideTree(){
+        if (tree.h == 1){
+            topLeft = new QuadTree(tree.point.x, tree.point.y,1,1);
+            topRight = new QuadTree(tree.point.x + 1, tree.point.y,1,1);
+        }else if(tree.w == 1){
+            topLeft = new QuadTree(tree.point.x, tree.point.y, 1,1);
+            topRight = new QuadTree(tree.point.x, tree.point.y + 1,1,1);
         }else{
-            int halfWidth = width/2;
-            int otherHalfWidth = (int)Math.ceil((double)width/2.0);
+            int halfWidth = tree.w/2;
+            int otherHalfWidth = (int)Math.ceil((double)tree.w/2.0);
 
-            int halfHeight = height/2;
-            int otherHalfHeight = (int)Math.ceil((double)height/2.0);
+            int halfHeight = tree.h/2;
+            int otherHalfHeight = (int)Math.ceil((double)tree.h/2.0);
 
-            topLeft = new QuadTree(topLeftPoint.x, topLeftPoint.y, halfWidth, halfHeight);
-            topRight = new QuadTree(topLeftPoint.x + halfWidth, topLeftPoint.y, otherHalfWidth, halfHeight);
+            topLeft = new QuadTree(tree.point.x, tree.point.y, halfWidth, halfHeight);
+            topRight = new QuadTree(tree.point.x + halfWidth, tree.point.y, otherHalfWidth, halfHeight);
 
-            bottomLeft = new QuadTree(topLeftPoint.x, topLeftPoint.y + halfHeight, halfWidth, otherHalfHeight);
-            bottomRight = new QuadTree(topLeftPoint.x + halfWidth, topLeftPoint.y + halfHeight, otherHalfWidth, otherHalfHeight);
+            bottomLeft = new QuadTree(tree.point.x, tree.point.y + halfHeight, halfWidth, otherHalfHeight);
+            bottomRight = new QuadTree(tree.point.x + halfWidth, tree.point.y + halfHeight, otherHalfWidth, otherHalfHeight);
         }
     }
 
-     public Point getPointLocation(int x, int y){
-         if (x < topLeftPoint.x || x >= (topLeftPoint.x + width) || y < topLeftPoint.y || y >= (topLeftPoint.y + height)){
+     public Point getTreePoint(int x, int y){
+
+         if (!validPoint(x,y)){
              return null;
          }
 
          if (topLeft == null){
-             return topLeftPoint;
+             return tree.point;
          }
 
-         Point ret = null;
-         ret = topLeft.getPointLocation(x,y);
+         Point ret;
+         ret = topLeft.getTreePoint(x,y);
          if (ret != null){
              return ret;
          }
-         ret = topRight.getPointLocation(x,y);
+         ret = topRight.getTreePoint(x,y);
          if (ret != null){
              return ret;
          }
-         ret = bottomLeft.getPointLocation(x,y);
+         ret = bottomLeft.getTreePoint(x,y);
          if (ret != null){
              return ret;
          }
-         ret = bottomRight.getPointLocation(x,y);
+         ret = bottomRight.getTreePoint(x,y);
          if (ret != null){
              return ret;
          }
@@ -128,33 +132,34 @@ public class QuadTree {
          return ret;
      }
 
-    public Rectangle getPointLocationAndDimensions(int x, int y){
+    public Rectangle getTreeNode(int x, int y){
 
-        if (x < topLeftPoint.x || x >= (topLeftPoint.x + width) || y < topLeftPoint.y || y >= (topLeftPoint.y + height)){
+        if (!validPoint(x,y)){
             return null;
         }
 
-        if (topLeft == null){
+        if (topLeft == null ){
             if (filledIn){
                 return null;
             }
-            return new Rectangle(topLeftPoint, width, height);
+            return tree;
         }
 
-        Rectangle ret = topLeft.getPointLocationAndDimensions(x,y);
+        Rectangle ret = topLeft.getTreeNode(x,y);
         if (ret != null){
             return ret;
         }
-        ret = topRight.getPointLocationAndDimensions(x,y);
+        ret = topRight.getTreeNode(x,y);
         if (ret != null){
             return ret;
         }
-        if (bottomLeft != null){
-            ret = bottomLeft.getPointLocationAndDimensions(x,y);
+
+        if (bottomLeft != null && bottomRight != null){
+            ret = bottomLeft.getTreeNode(x,y);
             if (ret != null){
                 return ret;
             }
-            ret = bottomRight.getPointLocationAndDimensions(x,y);
+            ret = bottomRight.getTreeNode(x,y);
             if (ret != null) {
                 return ret;
             }
@@ -163,48 +168,48 @@ public class QuadTree {
         return ret;
     }
 
-    public ArrayList<Rectangle> getNeighbors(int x, int y){
+    public ArrayList<Rectangle> getNeighborNodes(int x, int y){
 
         ArrayList<Rectangle> neighbors = new ArrayList<>();
 
-        Rectangle currentData = getPointLocationAndDimensions(x, y);
+        Rectangle currentNode = getTreeNode(x, y);
 
-        int checkX = currentData.point.x;
-        int checkY = currentData.point.y - 1;
+        int nextNodeX = currentNode.point.x;
+        int nextNodeY = currentNode.point.y - 1;
 
-        Rectangle neighbor = getPointLocationAndDimensions(checkX, checkY);
-        while (neighbor != null && checkX < currentData.point.x + currentData.w){
-            checkX += neighbor.w;
+        Rectangle neighbor = getTreeNode(nextNodeX, nextNodeY);
+        while (neighbor != null && nextNodeX < currentNode.point.x + currentNode.w){
             neighbors.add(neighbor);
-            neighbor = getPointLocationAndDimensions(checkX, checkY);
+            nextNodeX += neighbor.w;
+            neighbor = getTreeNode(nextNodeX, nextNodeY);
         }
 
-        checkX = currentData.point.x;
-        checkY = currentData.point.y + currentData.h;
-        neighbor = getPointLocationAndDimensions(checkX, checkY);
-        while (neighbor != null && checkX < currentData.point.x + currentData.w){
-            checkX += neighbor.w;
+        nextNodeX = currentNode.point.x;
+        nextNodeY = currentNode.point.y + currentNode.h;
+        neighbor = getTreeNode(nextNodeX, nextNodeY);
+        while (neighbor != null && nextNodeX < currentNode.point.x + currentNode.w){
             neighbors.add(neighbor);
-            neighbor = getPointLocationAndDimensions(checkX, checkY);
+            nextNodeX += neighbor.w;
+            neighbor = getTreeNode(nextNodeX, nextNodeY);
         }
 
-        checkX = currentData.point.x - 1;
-        checkY = currentData.point.y;
-        neighbor = getPointLocationAndDimensions(checkX, checkY);
-        while (neighbor != null && checkY < currentData.point.y + currentData.h){
-            checkY += neighbor.h;
+        nextNodeX = currentNode.point.x - 1;
+        nextNodeY = currentNode.point.y;
+        neighbor = getTreeNode(nextNodeX, nextNodeY);
+        while (neighbor != null && nextNodeY < currentNode.point.y + currentNode.h){
             neighbors.add(neighbor);
-            neighbor = getPointLocationAndDimensions(checkX, checkY);
+            nextNodeY += neighbor.h;
+            neighbor = getTreeNode(nextNodeX, nextNodeY);
         }
 
 
-        checkX = currentData.point.x + currentData.w;
-        checkY = currentData.point.y;
-        neighbor = getPointLocationAndDimensions(checkX, checkY);
-        while (neighbor != null && checkY < currentData.point.y + currentData.h){
-            checkY += neighbor.h;
+        nextNodeX = currentNode.point.x + currentNode.w;
+        nextNodeY = currentNode.point.y;
+        neighbor = getTreeNode(nextNodeX, nextNodeY);
+        while (neighbor != null && nextNodeY < currentNode.point.y + currentNode.h){
             neighbors.add(neighbor);
-            neighbor = getPointLocationAndDimensions(checkX, checkY);
+            nextNodeY += neighbor.h;
+            neighbor = getTreeNode(nextNodeX, nextNodeY);
         }
 
         return neighbors;

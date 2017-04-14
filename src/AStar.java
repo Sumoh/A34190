@@ -17,8 +17,8 @@ public class AStar {
     Graphics2D g;
 
     public AStar(Point start, Point end, QuadTree tree, Graphics2D g){
-        this.start = tree.getPointLocation(start.x, start.y);
-        this.end = tree.getPointLocation(end.x, end.y);
+        this.start = tree.getTreePoint(start.x, start.y);
+        this.end = tree.getTreePoint(end.x, end.y);
         this.tree = tree;
         this.g = g;
 
@@ -31,8 +31,8 @@ public class AStar {
         openSet.add(set);
         ArrayList<Set> closedSet = new ArrayList<>();
 
-        Rectangle centerStart = tree.getPointLocationAndDimensions(start.x, start.y);
-        Rectangle centerEnd = tree.getPointLocationAndDimensions(end.x, end.y);
+        Rectangle centerStart = tree.getTreeNode(start.x, start.y);
+        Rectangle centerEnd = tree.getTreeNode(end.x, end.y);
 
         int ovalWidth = 10;
         int ovalHeight = 10;
@@ -60,8 +60,8 @@ public class AStar {
 
                 while (current.prev != null) {
                     g.setColor(new Color(255, 0, 0));
-                    Rectangle r = tree.getPointLocationAndDimensions(current.prev.x, current.prev.y);
-                    Rectangle rc = tree.getPointLocationAndDimensions(current.p.x, current.p.y);
+                    Rectangle r = tree.getTreeNode(current.prev.x, current.prev.y);
+                    Rectangle rc = tree.getTreeNode(current.p.x, current.p.y);
 
                     ax = (r.point.x + (r.w/2));
                     ay = (r.point.y + (r.h/2));
@@ -90,7 +90,7 @@ public class AStar {
 
             openSet.remove(current);
             closedSet.add(current);
-            ArrayList<Rectangle> neighbors = tree.getNeighbors(current.p.x, current.p.y);
+            ArrayList<Rectangle> neighbors = tree.getNeighborNodes(current.p.x, current.p.y);
             for (Rectangle neighbor : neighbors){
                 Point p = neighbor.point;
                 boolean found = false;

@@ -2,8 +2,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.concurrent.ThreadLocalRandom;
@@ -185,7 +183,7 @@ class Canvas extends JComponent {
         start = p;
         end = p2;
 
-        if (tree.getPointLocation(p.x, p.y) == tree.getPointLocation(p2.x, p2.y)){
+        if (tree.getTreePoint(p.x, p.y) == tree.getTreePoint(p2.x, p2.y)){
             setRandomPoints();
         }
 
