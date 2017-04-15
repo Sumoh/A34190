@@ -118,31 +118,28 @@ class Canvas extends JComponent {
         filledin.clear();
 
         for (int i = 0; i < numObstacles; i++){
-            int iX = randInt(0, mapSize -1);
-            int iY = randInt(0, mapSize -1);
+            int randX = randInt(0, mapSize -1);
+            int randY = randInt(0, mapSize -1);
             int obsWidth = randInt(minObstacleSize, maxObstacleSize);
             int obsHeight = randInt(minObstacleSize, maxObstacleSize);
 
-            int finalX = iX - (obsWidth/2);
-            int finalY = iY - (obsHeight/2);
+            int obstacleX = randX - (obsWidth/2);
+            int obstacleY = randY - (obsHeight/2);
 
-            if (finalX < 0){
-                finalX = 0;
+            if (obstacleX < 0){
+                obstacleX = 0;
+            }
+            if (obstacleY < 0){
+                obstacleY = 0;
+            }
+            if (obstacleX + obsWidth >= mapSize){
+                obstacleX = mapSize - obsWidth;
+            }
+            if (obstacleY + obsHeight >= mapSize){
+                obstacleY = mapSize - obsHeight;
             }
 
-            if (finalY < 0){
-                finalY = 0;
-            }
-
-            if (finalX + obsWidth >= mapSize){
-                obsWidth = mapSize - finalX;
-            }
-
-            if (finalY + obsHeight >= mapSize){
-                obsHeight = mapSize - finalY;
-            }
-
-            obstacles.add(new Rectangle(finalX,finalY,obsWidth,obsHeight));
+            obstacles.add(new Rectangle(obstacleX,obstacleY,obsWidth,obsHeight));
 
         }
 
@@ -160,7 +157,7 @@ class Canvas extends JComponent {
                 for (int w = 0; w < height; w++){
                     if (filledin.get((x+z)+((y+w)* mapSize)) == false) {
                         filledin.set((x + z) + ((y + w) * mapSize));
-                        tree.insert(x+z, y+w);
+                        tree.add(x+z, y+w);
                     }
                 }
             }
@@ -197,7 +194,7 @@ class Canvas extends JComponent {
             AStar astar = new AStar(start, end, tree, g);
             if (astar.findPath()) {
                 g.setColor(new Color(0, 0, 0));
-                g.drawString("Path Found!", 375, mapSize + 15);
+                g.drawString("Path Found: " + astar.pathNodes, 375, mapSize + 15);
             } else {
                 g.setColor(new Color(0, 0, 0));
                 g.drawString("Couldn't find path!", 375, mapSize + 15);
@@ -206,7 +203,7 @@ class Canvas extends JComponent {
             RRT rrt = new RRT(start,end,obstacles, mapSize);
             if (rrt.findPath(g)){
                 g.setColor(new Color(0, 0, 0));
-                g.drawString("Path Found!", 375, mapSize + 15);
+                g.drawString("Path Found: " + rrt.pathNodes, 375, mapSize + 15);
             }else{
                 g.setColor(new Color(0, 0, 0));
                 g.drawString("Couldn't find path!", 375, mapSize + 15);

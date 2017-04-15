@@ -1,5 +1,4 @@
 import java.awt.Graphics2D;
-import java.awt.Color;
 import java.util.ArrayList;
 
 /**
@@ -9,17 +8,17 @@ public class QuadTree {
 
     Rectangle tree;
 
-    boolean filledIn = false;
+    boolean hasObject = false;
 
     QuadTree topLeft, topRight, bottomLeft, bottomRight;
 
 
-    public QuadTree(int tlx, int tly, int w, int h){
-        tree = new Rectangle(tlx, tly, w, h);
+    public QuadTree(int topLeftX, int topLeftY, int w, int h){
+        tree = new Rectangle(topLeftX, topLeftY, w, h);
     }
 
     public void draw(Graphics2D g){
-        if (!filledIn) {
+        if (!hasObject) {
             g.drawRect(tree.point.x, tree.point.y, tree.w, tree.h);
 
             if (topLeft != null) {
@@ -37,23 +36,14 @@ public class QuadTree {
         }
     }
 
-    public boolean validPoint(int x, int y){
-        if (y < tree.point.y || y >= (tree.point.y + tree.h) || x < tree.point.x || x >= (tree.point.x + tree.w)){
-            return false;
-        }
-
-        return true;
-    }
-
-
-    public boolean insert(int x,int y){
+    public boolean add(int x, int y){
 
         if (!validPoint(x,y)){
             return false;
         }
 
         if (tree.h == 1 && tree.w == 1){ //1 cm accuracy
-            filledIn = true;
+            hasObject = true;
             return true;
         }
 
@@ -61,16 +51,16 @@ public class QuadTree {
             divideTree();
         }
 
-        if (topLeft.insert(x,y)){
+        if (topLeft.add(x,y)){
             return true;
         }
-        if (topRight.insert(x,y)){
+        if (topRight.add(x,y)){
             return true;
         }
-        if (bottomLeft.insert(x,y)){
+        if (bottomLeft.add(x,y)){
             return true;
         }
-        if (bottomRight.insert(x,y)){
+        if (bottomRight.add(x,y)){
             return true;
         }
 
@@ -130,42 +120,6 @@ public class QuadTree {
          return ret;
      }
 
-    public Rectangle getTreeNode(int x, int y){
-
-        if (!validPoint(x,y)){
-            return null;
-        }
-
-        if (topLeft == null ){
-            if (filledIn){
-                return null;
-            }
-            return tree;
-        }
-
-        Rectangle ret = topLeft.getTreeNode(x,y);
-        if (ret != null){
-            return ret;
-        }
-        ret = topRight.getTreeNode(x,y);
-        if (ret != null){
-            return ret;
-        }
-
-        if (bottomLeft != null && bottomRight != null){
-            ret = bottomLeft.getTreeNode(x,y);
-            if (ret != null){
-                return ret;
-            }
-            ret = bottomRight.getTreeNode(x,y);
-            if (ret != null) {
-                return ret;
-            }
-        }
-
-        return ret;
-    }
-
     public ArrayList<Rectangle> getNeighborNodes(int x, int y){
 
         ArrayList<Rectangle> neighbors = new ArrayList<>();
@@ -174,7 +128,6 @@ public class QuadTree {
 
         int nextNodeX = currentNode.point.x;
         int nextNodeY = currentNode.point.y - 1;
-
         Rectangle neighbor = getTreeNode(nextNodeX, nextNodeY);
         while (neighbor != null && nextNodeX < currentNode.point.x + currentNode.w){
             neighbors.add(neighbor);
@@ -212,6 +165,50 @@ public class QuadTree {
 
         return neighbors;
 
+    }
+
+    public Rectangle getTreeNode(int x, int y){
+
+        if (!validPoint(x,y)){
+            return null;
+        }
+
+        if (topLeft == null ){
+            if (hasObject){
+                return null;
+            }
+            return tree;
+        }
+
+        Rectangle ret = topLeft.getTreeNode(x,y);
+        if (ret != null){
+            return ret;
+        }
+        ret = topRight.getTreeNode(x,y);
+        if (ret != null){
+            return ret;
+        }
+
+        if (bottomLeft != null && bottomRight != null){
+            ret = bottomLeft.getTreeNode(x,y);
+            if (ret != null){
+                return ret;
+            }
+            ret = bottomRight.getTreeNode(x,y);
+            if (ret != null) {
+                return ret;
+            }
+        }
+
+        return ret;
+    }
+
+    public boolean validPoint(int x, int y){
+        if (y < tree.point.y || y >= (tree.point.y + tree.h) || x < tree.point.x || x >= (tree.point.x + tree.w)){
+            return false;
+        }
+
+        return true;
     }
 
 

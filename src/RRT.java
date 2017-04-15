@@ -14,6 +14,7 @@ public class RRT {
     int size;
     int MAXNODES = 5000;
     double step = 10.0;
+    int pathNodes = 0;
 
     public RRT(Point start, Point end, ArrayList<Rectangle> obstacles, int size){
 
@@ -101,6 +102,7 @@ public class RRT {
             Node add = new Node(newNode, parent);
             nodes.add(add);
             g.drawLine(parent.position.x, parent.position.y, newNode.x, newNode.y);
+            pathNodes++;
 
             if (pointInGoal(newNode, step)){
                 Node goal = new Node(end, add);
@@ -112,6 +114,7 @@ public class RRT {
                 while (currNode.parent != null){
                     g.drawLine(currNode.position.x, currNode.position.y, currNode.parent.position.x, currNode.parent.position.y);
                     currNode = currNode.parent;
+
                 }
 
 

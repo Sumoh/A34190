@@ -12,6 +12,7 @@ public class AStar {
     Point end;
     QuadTree tree;
     Graphics2D g;
+    int pathNodes = 0;
 
     public AStar(Point start, Point end, QuadTree tree, Graphics2D g){
         this.start = tree.getTreePoint(start.x, start.y);
@@ -28,7 +29,6 @@ public class AStar {
         openTreePath.add(treePath);
         ArrayList<TreePath> closedTreePath = new ArrayList<>();
 
-
         TreePath current;
 
         while (openTreePath.size() > 0){
@@ -43,28 +43,27 @@ public class AStar {
 
                 while (current.prev != null) {
                     g.setColor(new Color(0, 255, 255));
-                    Rectangle r = tree.getTreeNode(current.prev.x, current.prev.y);
-                    Rectangle rc = tree.getTreeNode(current.p.x, current.p.y);
+                    Rectangle prevRec = tree.getTreeNode(current.prev.x, current.prev.y);
+                    Rectangle currentRec = tree.getTreeNode(current.p.x, current.p.y);
 
-                    int ax = (r.point.x + (r.w/2));
-                    int ay = (r.point.y + (r.h/2));
-                    int bx = (rc.point.x + (rc.w/2));
-                    int by = (rc.point.y + (rc.h/2));
+                    int ax = (prevRec.point.x + (prevRec.w/2));
+                    int ay = (prevRec.point.y + (prevRec.h/2));
+                    int bx = (currentRec.point.x + (currentRec.w/2));
+                    int by = (currentRec.point.y + (currentRec.h/2));
 
                     g.drawLine(ax,ay,bx,by);
+                    pathNodes++;
 
-                    //g.drawLine((current.prev.x, current.prev.y, current.p.x, current.p.y);
-                    boolean bail = false;
                     for (TreePath sets : openTreePath) {
-                        if (current.prev != null && current.prev.equals(sets.p) && bail != true) {
+                        if (current.prev != null && current.prev.equals(sets.p)) {
                             current = sets;
-                            bail = true;
+                            break;
                         }
                     }
                     for (TreePath sets : closedTreePath) {
-                        if (current.prev != null && current.prev.equals(sets.p) && bail != true) {
+                        if (current.prev != null && current.prev.equals(sets.p)) {
                             current = sets;
-                            bail = true;
+                            break;
                         }
                     }
                 }
@@ -80,6 +79,7 @@ public class AStar {
                 for (TreePath sets : closedTreePath){
                     if (sets.p.equals(p)){
                         found = true;
+                        break;
                     }
                 }
                 if (!found){
@@ -103,6 +103,22 @@ public class AStar {
         }
 
         return false;
+    }
+
+}
+
+class TreePath {
+
+    public Point p;
+    public double start;
+    public double end;
+    public Point prev;
+
+    public TreePath(Point p, double start, double end, Point prev){
+        this.p = p;
+        this.start = start;
+        this.end = end;
+        this.prev = prev;
     }
 
 }
