@@ -1,7 +1,5 @@
-import Helpers.Point;
-import Helpers.Rectangle;
-
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Color;
 import java.util.ArrayList;
 
 /**
