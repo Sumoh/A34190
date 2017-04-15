@@ -16,4 +16,8 @@ public class Point {
     public boolean equals(Point p){
         return (x == p.x) && (y == p.y);
     }
+
+    public double distance(Point p){
+        return Math.hypot(x - p.x, y - p.y);
+    }
 }

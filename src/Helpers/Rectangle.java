@@ -26,4 +26,12 @@ public class Rectangle {
         g.fillRect(point.x, point.y, w, h);
     }
 
+    public boolean pointIntersects(Point p){
+        if (p.x >= point.x && p.x <= point.x + w && p.y >= point.y && p.y <= point.y + h){
+            return true;
+        }
+
+        return false;
+    }
+
 }

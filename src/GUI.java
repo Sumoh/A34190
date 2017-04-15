@@ -67,6 +67,8 @@ public class GUI extends JFrame implements KeyListener{
                 planeSize = 100;
             }
             remakeCanvas();
+        }else if(e.getKeyCode() == KeyEvent.VK_A){
+            canvas.toggleAStar();
         }
     }
 
@@ -88,6 +90,8 @@ class Canvas extends JComponent {
     int planeSize = 500;
     int minObstacleSize = 10;
     int maxObstacleSize = 50;
+
+    boolean aStar = true;
 
     long preTime = 0;
     long postTime = 0;
@@ -192,18 +196,35 @@ class Canvas extends JComponent {
     }
 
     public void solvePath(Graphics2D g){
-        AStar astar = new AStar(start, end, tree, g);
-        if (astar.findPath()){
-            g.setColor(new Color(0,0,0));
-            g.drawString("Path Found!", 375, planeSize+15);
+        if (aStar) {
+            AStar astar = new AStar(start, end, tree, g);
+            if (astar.findPath()) {
+                g.setColor(new Color(0, 0, 0));
+                g.drawString("Path Found!", 375, planeSize + 15);
+            } else {
+                g.setColor(new Color(0, 0, 0));
+                g.drawString("Couldn't find path!", 375, planeSize + 15);
+            }
         }else{
-            g.setColor(new Color(0,0,0));
-            g.drawString("Couldn't find path!", 375, planeSize+15);
+            RRT rrt = new RRT(start,end,obstacles,filledin, planeSize);
+            if (rrt.findPath(g)){
+                g.setColor(new Color(0, 0, 0));
+                g.drawString("Path Found!", 375, planeSize + 15);
+            }else{
+                g.setColor(new Color(0, 0, 0));
+                g.drawString("Couldn't find path!", 375, planeSize + 15);
+            }
         }
     }
 
     public void toggleTreeDraw(){
         drawTree = !drawTree;
+        repaint();
+    }
+
+    public void toggleAStar(){
+        aStar = !aStar;
+        setup();
         repaint();
     }
 
@@ -226,7 +247,7 @@ class Canvas extends JComponent {
             obstacles.get(i).draw(p);
         }
 
-        if (drawTree) {
+        if (drawTree && aStar) {
             g.setColor(new Color(18, 7, 255));
             tree.draw(p);
         }
